@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Estática de la partícula</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Fuerza Resultante Vertical</h1>
+    <p class="sub">Aprende cómo equilibrar fuerzas laterales en un carrito</p>
+
+    <div class="input-group">
+        <label for="f1">Fuerza Conocida (F1) en Newtons:</label>
+        <input type="number" id="f1" value="1600">
+    </div>
+
+    <div class="input-group">
+        <label for="a1">Ángulo de F1 (respecto a la vertical °):</label>
+        <input type="number" id="a1" value="15">
+    </div>
+
+    <div class="input-group">
+        <label for="ap">Ángulo deseado para P (°):</label>
+        <input type="number" id="ap" value="25">
+    </div>
+
+    <button id="btnCalcular">Calcular y Dibujar</button>
+
+    <div class="results">
+        <div class="result-item" id="res-p">Fuerza P necesaria: -</div>
+        <div class="result-item" id="res-r">Fuerza Resultante (R): -</div>
+    </div>
+
+    <canvas id="graficoCanvas" width="450" height="250"></canvas>
+</div>
+
+<script src="programa.js"></script>
+</body>
+</html>
