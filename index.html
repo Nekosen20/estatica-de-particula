@@ -3,29 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Estática de la partícula</title>
-    <link rel="stylesheet" href="estilo.css">
+    <title>Simulador de Equilibrio Vertical - Carrito</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Contenedor principal estilizado como tarjeta moderna */
+        .window-root {
+            width: 1080px;
+            height: 640px;
+            background-color: #ffffff;
+            display: flex;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        /* PANEL IZQUIERDO: Inputs y Controles */
+        .panel-izquierdo {
+            width: 360px;
+            display: flex;
+            flex-direction: column;
+            padding-right: 24px;
+            border-right: 1px solid #eaedf3;
+        }
+
+        .titulo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 20px;
+            margin-top: 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* Rediseño elegante de los LabelFrame (ahora tarjetas contenedoras) */
+        .label-frame {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            position: relative;
+            padding: 20px 16px 16px 16px;
+            background-color: #f8fafc;
+        }
+
+        .label-frame-title {
+            position: absolute;
+            top: -10px;
+            left: 12px;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        /* Inputs interactivos modernos */
+        input[type="number"] {
+            width: 110px;
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: right;
+            color: #334155;
+            background-color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+        }
+
+        /* Botón moderno con efecto hover e hidratación visual */
+        .btn-calcular {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .btn-calcular:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-calcular:active {
+            transform: translateY(1px);
+        }
+
+        /* Bloques de visualización de resultados */
+        .resultado-lbl {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .resultado-box {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px dashed #cbd5e1;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .resultado-box:last-child {
+            margin-bottom: 0;
+        }
+
+        #res_p { 
+            color: #ff7f0e; 
+            border-color: rgba(255, 127, 14, 0.3);
+            background-color: rgba(255, 127, 14, 0.02);
+        }
+        #res_r { 
+            color: #2ca02c; 
+            border-color: rgba(44, 160, 44, 0.3);
+            background-color: rgba(44, 160, 44, 0.02);
+        }
+
+        /* PANEL DERECHO: Canvas de Graficado */
+        .panel-derecho {
+            flex: 1;
+            background-color: #fafafa;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-left: 24px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+        }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Fuerza Resultante Vertical</h1>
-    <p class="sub">Aprende cómo equilibrar fuerzas laterales en un carrito</p>
+    <div class="window-root">
+        
+        <div class="panel-izquierdo">
+            <h1 class="titulo">Cálculo de Fuerzas</h1>
 
-    <div class="input-group">
-        <label for="f1">Fuerza Conocida (F1) en Newtons:</label>
-        <input type="number" id="f1" value="1600">
+            <div class="label-frame">
+                <span class="label-frame-title"> Datos del Problema </span>
+                <div class="input-group">
+                    <label for="entry_f1">Fuerza F1 conocida (N):</label>
+                    <input type="number" id="entry_f1" value="1600" step="any">
+                </div>
+                <div class="input-group">
+                    <label for="entry_ang1">Ángulo de F1 (° de la vertical):</label>
+                    <input type="number" id="entry_ang1" value="15" step="any">
+                </div>
+                <div class="input-group">
+                    <label for="entry_ang2">Ángulo de P (° de la vertical):</label>
+                    <input type="number" id="entry_ang2" value="25" step="any">
+                </div>
+            </div>
+
+            <button class="btn-calcular" onclick="calcularYGraficar()">🔄 Calcular y Graficar</button>
+
+            <div class="label-frame">
+                <span class="label-frame-title"> Resultados (Condición ΣFx = 0) </span>
+                
+                <span class="resultado-lbl">Fuerza Desconocida P necesaria:</span>
+                <div id="res_p" class="resultado-box">-</div>
+
+                <span class="resultado-lbl">Resultante Vertical Total R:</span>
+                <div id="res_r" class="resultado-box">-</div>
+            </div>
+        </div>
+
+        <div class="panel-derecho">
+            <canvas id="vectorCanvas"></canvas>
+        </div>
+
     </div>
 
-    <div class="input-group">
-        <label for="a1">Ángulo de F1 (respecto a la vertical °):</label>
-        <input type="number" id="a1" value="15">
-    </div>
+    <script>
+        const canvas = document.getElementById('vectorCanvas');
+        const ctx = canvas.getContext('2d');
 
-    <div class="input-group">
-        <label for="ap">Ángulo deseado para P (°):</label>
-        <input type="number" id="ap" value="25">
-    </div>
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        function drawArrow(ctx, fromx, fromy, tox, toy, color, lineWidth = 2) {
+            const headlen = 10; 
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = lineWidth;
+            
+            ctx.beginPath();
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function calcularYGraficar() {
+            try {
+                const f1 = parseFloat(document.getElementById('entry_f1').value);
+                const ang1_deg = parseFloat(document.getElementById('entry_ang1').value);
+                const ang2_deg = parseFloat(document.getElementById('entry_ang2').value);
+
+                if (isNaN(f1) || isNaN(ang1_deg) || isNaN(ang2_deg)) {
+                    throw new Error("Invalid Input");
+                }
+
+                const ang1_rad = ang1_deg * Math.PI / 180;
+                const ang2_rad = ang2_deg * Math.PI / 180;
+
+                const p = (f1 * Math.sin(ang1_rad)) / Math.sin(ang2_rad);
+                const r = (f1 * Math.cos(ang1_rad)) + (p * Math.cos(ang2_rad));
+
+                document.getElementById('res_p').innerText = `P = ${p.toFixed(2)} N`;
+                document.getElementById('res_r').innerText = `R = ${r.toFixed(2)} N (${(r/1000).toFixed(2)} kN)`;
+
+                resizeCanvas();
+                const w = canvas.width / window.devicePixelRatio;
+                const h = canvas.height / window.devicePixelRatio;
+
+                ctx.clearRect(0, 0, w, h);
+
+                const max_val = Math.max(f1, p, r) * 1.1;
+                const scale = h / (max_val * 1.25); 
+                const originX = w / 2;
+                const originY = h - (max_val / 4) * scale;
+
+                const toPixelX = (x) => originX + x * scale;
+                const toPixelY = (y) => originY - y * scale;
+
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.lineWidth = 1;
+                const step = max_val / 5;
+                for(let i = -max_val; i <= max_val; i += step) {
+                    ctx.beginPath(); ctx.moveTo(toPixelX(i), 0); ctx.lineTo(toPixelX(i), h); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(0, toPixelY(i)); ctx.lineTo(w, toPixelY(i)); ctx.stroke();
+                }
+
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 0.8;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(0, originY); ctx.lineTo(w, originY); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(originX, 0); ctx.lineTo(originX, h); ctx.stroke();
+                ctx.setLineDash([]); 
+
+                const f1_x = f1 * Math.sin(ang1_rad);
+                const f1_y = f1 * Math.cos(ang1_rad);
+                const p_x = -p * Math.sin(ang2_rad);
+                const p_y = p * Math.cos(ang2_rad);
+
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath(); ctx.moveTo(toPixelX(f1_x), toPixelY(f1_y)); ctx.lineTo(toPixelX(0), toPixelY(r)); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(toPixelX(p_x), toPixelY(p_y)); ctx.lineTo(toPixelX(0), toPixelY(r)); ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawArrow(ctx, originX, originY, toPixelX(f1_x), toPixelY(f1_y), '#1f77b4', 2.5); 
+                drawArrow(ctx, originX, originY, toPixelX(p_x), toPixelY(p_y), '#ff7f0e', 2.5);   
+                drawArrow(ctx, originX, originY, toPixelX(0), toPixelY(r), '#2ca02c', 2.5);       
+
+                ctx.fillStyle = '#1e293b';
+                ctx.font = 'bold 14px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText("Diagrama de Fuerzas en Equilibrio Lateral", w / 2, 28);
+
+                ctx.font = '11px "Segoe UI", sans-serif';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText("Eje Horizontal (X) - Fuerza Lateral [N]", w / 2, h - 10);
+                
+                ctx.save();
+                ctx.translate(16, h / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText("Eje Vertical (Y) - Fuerza Estructural [N]", 0, 0);
+                ctx.restore();
+
+                const legX = w - 150;
+                const legY = 45;
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                ctx.fillRect(legX, legY, 135, 65);
+                ctx.strokeRect(legX, legY, 135, 65);
+
+                const drawLegendItem = (offsetX, offsetY, color, text) => {
+                    ctx.fillStyle = color;
+                    ctx.fillRect(offsetX, offsetY - 8, 12, 8);
+                    ctx.fillStyle = '#334155';
+                    ctx.font = '11px "Segoe UI", sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(text, offsetX + 18, offsetY);
+                };
+
+                drawLegendItem(legX + 8, legY + 18, '#1f77b4', `F1 (${f1}N)`);
+                drawLegendItem(legX + 8, legY + 36, '#ff7f0e', `P (${p.toFixed(1)}N)`);
+                drawLegendItem(legX + 8, legY + 54, '#2ca02c', `R (${r.toFixed(1)}N)`);
+
+            } catch (error) {
+                document.getElementById('res_p').innerText = "Error: Ingresa números válidos";
+                document.getElementById('res_r').innerText = "";
+            }
+        }
+
+        window.onload = calcularYGraficar;
+        window.onresize = calcularYGraficar;
+    </script>
+</body>
+</html>
 
     <button id="btnCalcular">Calcular y Dibujar</button>
 
